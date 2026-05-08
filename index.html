@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FoodieBox — Gourmet Meal Kit Delivery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+--warm-dark:#1a0f0a;--burnt-orange:#ff6b35;--cream:#fff5e6;--sage:#7cb342;
+--orange-glow:rgba(255,107,53,0.4);--cream-10:rgba(255,245,230,0.1);
+--cream-20:rgba(255,245,230,0.2);--cream-60:rgba(255,245,230,0.6);
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{
+font-family:'Inter',sans-serif;background:var(--warm-dark);color:var(--cream);
+overflow-x:hidden;cursor:none;
+}
+/* Cursor Glow */
+.cursor-glow{
+position:fixed;width:300px;height:300px;border-radius:50%;
+background:radial-gradient(circle,var(--orange-glow) 0%,transparent 70%);
+pointer-events:none;z-index:9999;transform:translate(-50%,-50%);
+transition:opacity 0.3s;mix-blend-mode:screen;
+}
+.cursor-dot{
+position:fixed;width:8px;height:8px;border-radius:50%;
+background:var(--burnt-orange);pointer-events:none;z-index:10000;
+transform:translate(-50%,-50%);box-shadow:0 0 20px var(--burnt-orange);
+}
+/* Noise Texture */
+.noise-overlay{
+position:fixed;inset:0;z-index:9998;pointer-events:none;opacity:0.035;
+background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+background-repeat:repeat;background-size:256px 256px;
+}
+/* Floating Particles */
+.particles{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.particle{
+position:absolute;font-size:1.2rem;opacity:0.15;
+animation:floatParticle linear infinite;will-change:transform;
+}
+@keyframes floatParticle{
+0%{transform:translateY(110vh) rotate(0deg);opacity:0}
+10%{opacity:0.15}
+90%{opacity:0.15}
+100%{transform:translateY(-10vh) rotate(720deg);opacity:0}
+}
+/* Gradient Orbs */
+.orb{
+position:absolute;border-radius:50%;filter:blur(80px);
+pointer-events:none;z-index:0;will-change:transform;
+}
+.orb-1{
+width:600px;height:600px;background:radial-gradient(circle,rgba(255,107,53,0.15),transparent 70%);
+top:-200px;right:-200px;animation:orbFloat1 20s ease-in-out infinite;
+}
+.orb-2{
+width:500px;height:500px;background:radial-gradient(circle,rgba(124,179,66,0.1),transparent 70%);
+bottom:10%;left:-150px;animation:orbFloat2 25s ease-in-out infinite;
+}
+.orb-3{
+width:400px;height:400px;background:radial-gradient(circle,rgba(255,107,53,0.08),transparent 70%);
+top:40%;right:10%;animation:orbFloat3 18s ease-in-out infinite;
+}
+@keyframes orbFloat1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-60px,40px) scale(1.1)}}
+@keyframes orbFloat2{0%,100%{transform:translate(0,0)}50%{transform:translate(50px,-30px)}}
+@keyframes orbFloat3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-30px,-50px) scale(0.9)}}
+/* Navigation */
+nav{
+position:fixed;top:0;left:0;right:0;z-index:100;
+padding:1rem 3rem;display:flex;justify-content:space-between;align-items:center;
+background:linear-gradient(180deg,rgba(26,15,10,0.9) 0%,transparent 100%);
+backdrop-filter:blur(10px);transition:all 0.4s;
+}
+nav.scrolled{background:rgba(26,15,10,0.95);box-shadow:0 2px 40px rgba(0,0,0,0.3)}
+.logo{
+font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;
+color:var(--cream);letter-spacing:-0.02em;
+}
+.logo span{color:var(--burnt-orange)}
+.nav-links{display:flex;gap:2.5rem;list-style:none;align-items:center}
+.nav-links a{
+color:var(--cream-60);text-decoration:none;font-size:0.9rem;font-weight:500;
+transition:color 0.3s;position:relative;
+}
+.nav-links a::after{
+content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;
+background:var(--burnt-orange);transition:width 0.3s;
+}
+.nav-links a:hover{color:var(--cream)}
+.nav-links a:hover::after{width:100%}
+.btn{
+display:inline-block;padding:0.75rem 2rem;border-radius:50px;font-weight:600;
+font-size:0.9rem;text-decoration:none;transition:all 0.3s;border:none;cursor:none;
+position:relative;overflow:hidden;
+}
+.btn-primary{
+background:linear-gradient(135deg,var(--burnt-orange),#ff8c5a);
+color:#fff;box-shadow:0 4px 20px rgba(255,107,53,0.3);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(255,107,53,0.5)}
+.btn-outline{
+background:transparent;color:var(--cream);border:1px solid var(--cream-20);
+}
+.btn-outline:hover{border-color:var(--burnt-orange);color:var(--burnt-orange);transform:translateY(-2px)}
+/* Hero */
+.hero{
+min-height:100vh;display:flex;align-items:center;justify-content:center;
+position:relative;padding:6rem 3rem 4rem;overflow:hidden;
+}
+.hero-content{
+display:grid;grid-template-columns:1fr 1fr;gap:4rem;max-width:1300px;
+align-items:center;position:relative;z-index:2;
+}
+.hero-text h1{
+font-family:'Playfair Display',serif;font-size:clamp(2.8rem,5vw,4.5rem);
+font-weight:700;line-height:1.1;margin-bottom:1.5rem;
+background:linear-gradient(135deg,var(--cream) 0%,var(--burnt-orange) 100%);
+-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-text h1 em{
+font-style:italic;-webkit-text-fill-color:var(--burnt-orange);
+background:none;
+}
+.hero-text p{
+font-size:1.15rem;line-height:1.7;color:var(--cream-60);margin-bottom:2rem;
+max-width:480px;font-weight:300;
+}
+.hero-btns{display:flex;gap:1rem;flex-wrap:wrap}
+.hero-stats{
+display:flex;gap:3rem;margin-top:3rem;padding-top:2rem;
+border-top:1px solid var(--cream-10);
+}
+.stat-num{
+font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;
+color:var(--burnt-orange);
+}
+.stat-label{font-size:0.8rem;color:var(--cream-60);text-transform:uppercase;letter-spacing:0.1em}
+/* Hero SVG Scene */
+.hero-scene{
+position:relative;width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+}
+.hero-scene svg{width:100%;height:100%;max-width:550px}
+@keyframes steamRise{
+0%{transform:translateY(0) scaleX(1);opacity:0.6}
+50%{transform:translateY(-30px) scaleX(1.3);opacity:0.3}
+100%{transform:translateY(-60px) scaleX(0.8);opacity:0}
+}
+.steam{animation:steamRise 3s ease-in-out infinite}
+.steam-1{animation-delay:0s}
+.steam-2{animation-delay:0.8s}
+.steam-3{animation-delay:1.6s}
+@keyframes plateGlow{
+0%,100%{filter:drop-shadow(0 0 20px rgba(255,107,53,0.2))}
+50%{filter:drop-shadow(0 0 40px rgba(255,107,53,0.4))}
+}
+.plate-glow{animation:plateGlow 4s ease-in-out infinite}
+@keyframes floatIngredient{
+0%,100%{transform:translateY(0) rotate(0deg)}
+50%{transform:translateY(-10px) rotate(5deg)}
+}
+.float-ingredient{animation:floatIngredient 4s ease-in-out infinite}
+.float-ingredient-2{animation-delay:1s}
+.float-ingredient-3{animation-delay:2s}
+.float-ingredient-4{animation-delay:0.5s}
+/* Section Styles */
+section{position:relative;z-index:2;padding:6rem 3rem}
+.section-header{text-align:center;margin-bottom:4rem}
+.section-tag{
+display:inline-block;padding:0.4rem 1.2rem;border-radius:50px;
+background:rgba(255,107,53,0.1);color:var(--burnt-orange);
+font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.15em;
+margin-bottom:1rem;border:1px solid rgba(255,107,53,0.2);
+}
+.section-title{
+font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3.2rem);
+font-weight:700;color:var(--cream);margin-bottom:1rem;
+}
+.section-subtitle{font-size:1.05rem;color:var(--cream-60);max-width:550px;margin:0 auto;font-weight:300}
+/* How It Works */
+.steps-grid{
+display:grid;grid-template-columns:repeat(3,1fr);gap:2.5rem;max-width:1100px;margin:0 auto;
+}
+.step-card{
+background:linear-gradient(135deg,rgba(255,245,230,0.05),rgba(255,245,230,0.02));
+border:1px solid var(--cream-10);border-radius:24px;padding:2.5rem 2rem;
+text-align:center;transition:all 0.4s;position:relative;overflow:hidden;
+}
+.step-card::before{
+content:'';position:absolute;inset:0;border-radius:24px;
+background:linear-gradient(135deg,rgba(255,107,53,0.1),transparent);
+opacity:0;transition:opacity 0.4s;
+}
+.step-card:hover{transform:translateY(-8px);box-shadow:0 20px 60px rgba(255,107,53,0.15);border-color:rgba(255,107,53,0.3)}
+.step-card:hover::before{opacity:1}
+.step-icon{
+width:80px;height:80px;margin:0 auto 1.5rem;border-radius:20px;
+background:linear-gradient(135deg,rgba(255,107,53,0.15),rgba(124,179,66,0.1));
+display:flex;align-items:center;justify-content:center;font-size:2.2rem;
+position:relative;z-index:1;
+}
+.step-num{
+position:absolute;top:1rem;right:1.2rem;font-family:'Playfair Display',serif;
+font-size:3rem;font-weight:800;color:rgba(255,245,230,0.04);
+}
+.step-card h3{
+font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:600;
+color:var(--cream);margin-bottom:0.8rem;position:relative;z-index:1;
+}
+.step-card p{color:var(--cream-60);font-size:0.9rem;line-height:1.6;position:relative;z-index:1}
+/* Menu / Recipe Cards */
+.recipes-grid{
+display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;max-width:1100px;margin:0 auto;
+}
+.recipe-card{
+perspective:1000px;height:420px;cursor:none;
+}
+.recipe-card-inner{
+position:relative;width:100%;height:100%;transition:transform 0.8s cubic-bezier(0.4,0,0.2,1);
+transform-style:preserve-3d;
+}
+.recipe-card:hover .recipe-card-inner{transform:rotateY(180deg)}
+.recipe-front,.recipe-back{
+position:absolute;inset:0;backface-visibility:hidden;border-radius:24px;
+overflow:hidden;
+}
+.recipe-front{
+background:linear-gradient(180deg,rgba(255,245,230,0.06),rgba(255,245,230,0.02));
+border:1px solid var(--cream-10);display:flex;flex-direction:column;
+}
+.recipe-back{
+background:linear-gradient(135deg,rgba(255,107,53,0.15),rgba(26,15,10,0.95));
+border:1px solid rgba(255,107,53,0.3);transform:rotateY(180deg);
+display:flex;flex-direction:column;justify-content:center;align-items:center;
+padding:2rem;text-align:center;
+}
+.recipe-img{
+height:200px;display:flex;align-items:center;justify-content:center;
+font-size:5rem;position:relative;overflow:hidden;
+}
+.recipe-img::after{
+content:'';position:absolute;bottom:0;left:0;right:0;height:60px;
+background:linear-gradient(transparent,rgba(26,15,10,0.8));
+}
+.recipe-info{padding:1.5rem;flex:1}
+.recipe-tag{
+display:inline-block;padding:0.25rem 0.8rem;border-radius:50px;font-size:0.7rem;
+font-weight:600;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.8rem;
+}
+.tag-italian{background:rgba(124,179,66,0.2);color:var(--sage)}
+.tag-french{background:rgba(255,107,53,0.2);color:var(--burnt-orange)}
+.tag-asian{background:rgba(255,193,7,0.2);color:#ffc107}
+.recipe-info h3{
+font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:600;
+color:var(--cream);margin-bottom:0.5rem;
+}
+.recipe-info p{color:var(--cream-60);font-size:0.85rem;line-height:1.5}
+.recipe-meta{display:flex;gap:1.5rem;margin-top:1rem;font-size:0.8rem;color:var(--cream-60)}
+.recipe-meta span{display:flex;align-items:center;gap:0.3rem}
+.recipe-back h3{
+font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--cream);
+margin-bottom:1rem;
+}
+.recipe-back p{color:var(--cream-60);font-size:0.9rem;line-height:1.6;margin-bottom:1.5rem}
+.recipe-back .btn{font-size:0.85rem;padding:0.6rem 1.5rem}
+/* Nutrition */
+.nutrition-section{
+background:linear-gradient(180deg,transparent,rgba(124,179,66,0.03),transparent);
+}
+.nutrition-grid{
+display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;max-width:1000px;margin:0 auto;
+}
+.macro-card{
+background:linear-gradient(135deg,rgba(255,245,230,0.05),rgba(255,245,230,0.02));
+border:1px solid var(--cream-10);border-radius:24px;padding:2.5rem 1.5rem;
+text-align:center;transition:all 0.4s;position:relative;overflow:hidden;
+}
+.macro-card:hover{transform:translateY(-5px);box-shadow:0 15px 40px rgba(255,107,53,0.12)}
+.macro-ring{
+width:100px;height:100px;margin:0 auto 1.5rem;position:relative;
+}
+.macro-ring svg{transform:rotate(-90deg)}
+.macro-ring circle{fill:none;stroke-width:8}
+.macro-bg{stroke:rgba(255,245,230,0.05)}
+.macro-progress{stroke-linecap:round;transition:stroke-dashoffset 2s ease}
+.macro-value{
+position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;
+}
+.macro-card h4{
+font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--cream);
+margin-bottom:0.3rem;
+}
+.macro-card p{font-size:0.8rem;color:var(--cream-60)}
+/* Testimonials */
+.testimonials-grid{
+display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;max-width:1100px;margin:0 auto;
+}
+.testimonial-card{
+background:linear-gradient(135deg,rgba(255,245,230,0.05),rgba(255,245,230,0.02));
+border:1px solid var(--cream-10);border-radius:24px;padding:2.5rem;
+transition:all 0.4s;position:relative;
+}
+.testimonial-card:hover{transform:translateY(-5px);box-shadow:0 15px 40px rgba(255,107,53,0.12);border-color:rgba(255,107,53,0.2)}
+.testimonial-card::before{
+content:'"';font-family:'Playfair Display',serif;font-size:5rem;
+color:rgba(255,107,53,0.15);position:absolute;top:0.5rem;left:1.5rem;
+line-height:1;
+}
+.stars{color:var(--burnt-orange);font-size:1rem;margin-bottom:1rem;letter:0.2rem}
+.testimonial-text{
+color:var(--cream-60);font-size:0.95rem;line-height:1.7;margin-bottom:1.5rem;
+font-style:italic;font-weight:300;
+}
+.testimonial-author{display:flex;align-items:center;gap:1rem}
+.author-avatar{
+width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+font-size:1.3rem;font-weight:700;font-family:'Playfair Display',serif;
+}
+.author-name{font-weight:600;color:var(--cream);font-size:0.9rem}
+.author-role{font-size:0.75rem;color:var(--cream-60)}
+/* Pricing */
+.pricing-grid{
+display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;max-width:1000px;margin:0 auto;
+}
+.pricing-card{
+background:linear-gradient(135deg,rgba(255,245,230,0.05),rgba(255,245,230,0.02));
+border:1px solid var(--cream-10);border-radius:28px;padding:3rem 2rem;
+text-align:center;transition:all 0.4s;position:relative;
+}
+.pricing-card:hover{transform:translateY(-8px);box-shadow:0 20px 60px rgba(255,107,53,0.15)}
+.pricing-card.featured{
+background:linear-gradient(135deg,rgba(255,107,53,0.12),rgba(255,107,53,0.04));
+border-color:rgba(255,107,53,0.3);transform:scale(1.05);
+}
+.pricing-card.featured:hover{transform:scale(1.05) translateY(-8px)}
+.popular-badge{
+position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+background:linear-gradient(135deg,var(--burnt-orange),#ff8c5a);
+color:#fff;padding:0.3rem 1.2rem;border-radius:50px;font-size:0.75rem;
+font-weight:600;letter-spacing:0.05em;white-space:nowrap;
+}
+.pricing-card h3{
+font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--cream);
+margin-bottom:0.5rem;
+}
+.pricing-amount{
+font-family:'Playfair Display',serif;font-size:3rem;font-weight:700;
+color:var(--cream);margin:1rem 0;
+}
+.pricing-amount span{font-size:1rem;color:var(--cream-60);font-weight:400}
+.pricing-desc{color:var(--cream-60);font-size:0.85rem;margin-bottom:2rem}
+.pricing-features{list-style:none;margin-bottom:2rem;text-align:left}
+.pricing-features li{
+padding:0.6rem 0;color:var(--cream-60);font-size:0.9rem;
+border-bottom:1px solid var(--cream-10);display:flex;align-items:center;gap:0.8rem;
+}
+.pricing-features li::before{content:'✓';color:var(--sage);font-weight:700}
+.pricing-card .btn{width:100%}
+/* CTA */
+.cta-section{
+padding:8rem 3rem;text-align:center;position:relative;overflow:hidden;
+}
+.cta-content{position:relative;z-index:2;max-width:700px;margin:0 auto}
+.cta-content h2{
+font-family:'Playfair Display',serif;font-size:clamp(2.2rem,4vw,3.5rem);
+font-weight:700;color:var(--cream);margin-bottom:1.5rem;
+}
+.cta-content p{font-size:1.1rem;color:var(--cream-60);margin-bottom:2.5rem;font-weight:300}
+.cta-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+/* Footer */
+footer{
+padding:4rem 3rem 2rem;border-top:1px solid var(--cream-10);
+position:relative;z-index:2;
+}
+.footer-grid{
+display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;
+max-width:1100px;margin:0 auto 3rem;
+}
+.footer-brand p{color:var(--cream-60);font-size:0.9rem;line-height:1.6;margin-top:1rem;max-width:280px}
+.footer-col h4{
+font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--cream);
+margin-bottom:1.2rem;
+}
+.footer-col ul{list-style:none}
+.footer-col li{margin-bottom:0.6rem}
+.footer-col a{color:var(--cream-60);text-decoration:none;font-size:0.85rem;transition:color 0.3s}
+.footer-col a:hover{color:var(--burnt-orange)}
+.footer-bottom{
+text-align:center;padding-top:2rem;border-top:1px solid var(--cream-10);
+color:var(--cream-60);font-size:0.8rem;
+}
+/* Scroll Animations */
+.reveal{
+opacity:0;transform:translateY(40px);transition:all 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+.reveal.visible{opacity:1;transform:translateY(0)}
+/* Responsive */
+@media(max-width:900px){
+.hero-content{grid-template-columns:1fr;text-align:center}
+.hero-text p{margin:0 auto 2rem}
+.hero-btns{justify-content:center}
+.hero-stats{justify-content:center}
+.hero-scene{max-width:400px;margin:0 auto}
+.steps-grid,.recipes-grid,.testimonials-grid,.pricing-grid{grid-template-columns:1fr}
+.nutrition-grid{grid-template-columns:repeat(2,1fr)}
+.pricing-card.featured{transform:scale(1)}
+.pricing-card.featured:hover{transform:translateY(-8px)}
+.footer-grid{grid-template-columns:1fr 1fr}
+nav{padding:1rem 1.5rem}
+.nav-links{display:none}
+}
+@media(max-width:600px){
+.nutrition-grid{grid-template-columns:1fr}
+.footer-grid{grid-template-columns:1fr}
+.hero{padding:5rem 1.5rem 3rem}
+section{padding:4rem 1.5rem}
+}
+</style>
+</head>
+<body>
+<div class="cursor-glow" id="cursorGlow"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="noise-overlay"></div>
+<div class="particles" id="particles"></div>
+
+<!-- Orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<!-- Nav -->
+<nav id="navbar">
+<div class="logo">Foodie<span>Box</span></div>
+<ul class="nav-links">
+<li><a href="#how-it-works">How It Works</a></li>
+<li><a href="#menu">Menu</a></li>
+<li><a href="#nutrition">Nutrition</a></li>
+<li><a href="#pricing">Pricing</a></li>
+<li><a href="#cta" class="btn btn-primary">Get Started</a></li>
+</ul>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+<div class="hero-content">
+<div class="hero-text">
+<h1>Gourmet Meals,<br><em>Delivered</em> to You</h1>
+<p>Chef-crafted recipes with organic, farm-fresh ingredients. Free shipping on every box. Personalized nutrition tailored to your lifestyle.</p>
+<div class="hero-btns">
+<a href="#pricing" class="btn btn-primary">Start Your Journey</a>
+<a href="#how-it-works" class="btn btn-outline">See How It Works</a>
+</div>
+<div class="hero-stats">
+<div><div class="stat-num">50K+</div><div class="stat-label">Happy Foodies</div></div>
+<div><div class="stat-num">200+</div><div class="stat-label">Chef Recipes</div></div>
+<div><div class="stat-num">100%</div><div class="stat-label">Organic</div></div>
+</div>
+</div>
+<div class="hero-scene">
+<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<radialGradient id="plateGrad" cx="50%" cy="40%" r="50%">
+<stop offset="0%" stop-color="#2a1a10"/>
+<stop offset="100%" stop-color="#1a0f0a"/>
+</radialGradient>
+<radialGradient id="foodGrad" cx="50%" cy="30%" r="60%">
+<stop offset="0%" stop-color="#ff8c5a"/>
+<stop offset="100%" stop-color="#ff6b35"/>
+</radialGradient>
+<radialGradient id="steamGrad" cx="50%" cy="100%" r="80%">
+<stop offset="0%" stop-color="rgba(255,245,230,0.15)"/>
+<stop offset="100%" stop-color="rgba(255,245,230,0)"/>
+</radialGradient>
+<filter id="glow">
+<feGaussianBlur stdDeviation="4" result="blur"/>
+<feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+</filter>
+<filter id="softGlow">
+<feGaussianBlur stdDeviation="8" result="blur"/>
+<feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+</filter>
+</defs>
+
+<!-- Steam -->
+<g class="steam steam-1" transform="translate(200,160)">
+<ellipse cx="15" cy="0" rx="12" ry="20" fill="url(#steamGrad)"/>
+<ellipse cx="-10" cy="10" rx="8" ry="15" fill="url(#steamGrad)"/>
+</g>
+<g class="steam steam-2" transform="translate(250,150)">
+<ellipse cx="0" cy="0" rx="14" ry="22" fill="url(#steamGrad)"/>
+<ellipse cx="12" cy="8" rx="9" ry="16" fill="url(#steamGrad)"/>
+</g>
+<g class="steam steam-3" transform="translate(300,165)">
+<ellipse cx="-8" cy="0" rx="10" ry="18" fill="url(#steamGrad)"/>
+<ellipse cx="10" cy="5" rx="11" ry="17" fill="url(#steamGrad)"/>
+</g>
+
+<!-- Plate -->
+<g class="plate-glow">
+<ellipse cx="250" cy="280" rx="160" ry="50" fill="none" stroke="#2a1a10" stroke-width="2"/>
+<ellipse cx="250" cy="275" rx="150" ry="45" fill="url(#plateGrad)" stroke="#3a2a20" stroke-width="1.5"/>
+<ellipse cx="250" cy="270" rx="130" ry="38" fill="none" stroke="#2a1a10" stroke-width="1"/>
+</g>
+
+<!-- Food on plate -->
+<g>
+<ellipse cx="220" cy="255" rx="45" ry="25" fill="#4a3520" opacity="0.8"/>
+<ellipse cx="220" cy="250" rx="42" ry="22" fill="#6b4c30"/>
+<ellipse cx="215" cy="247" rx="15" ry="8" fill="#8b6c45" opacity="0.5"/>
+</g>
+<g>
+<ellipse cx="280" cy="250" rx="35" ry="20" fill="#5a8a3a" opacity="0.7"/>
+<ellipse cx="280" cy="247" rx="30" ry="16" fill="#7cb342" opacity="0.6"/>
+<circle cx="270" cy="242" r="4" fill="#8bc34a" opacity="0.5"/>
+<circle cx="290" cy="245" r="3" fill="#8bc34a" opacity="0.4"/>
+</g>
+<g>
+<ellipse cx="250" cy="240" rx="30" ry="18" fill="#e8a040" opacity="0.8"/>
+<ellipse cx="250" cy="237" rx="26" ry="14" fill="#f0b050"/>
+<ellipse cx="245" cy="234" rx="8" ry="5" fill="#f5c060" opacity="0.5"/>
+</g>
+
+<!-- Garnish -->
+<g>
+<path d="M310,230 Q320,215 330,225 Q325,220 310,230Z" fill="#7cb342" opacity="0.8"/>
+<path d="M315,228 Q325,212 335,222" fill="none" stroke="#7cb342" stroke-width="1" opacity="0.6"/>
+</g>
+
+<!-- Floating Ingredients -->
+<g class="float-ingredient">
+<circle cx="100" cy="180" r="12" fill="#ff6b35" opacity="0.3"/>
+<circle cx="100" cy="180" r="8" fill="#ff8c5a" opacity="0.4"/>
+</g>
+<g class="float-ingredient float-ingredient-2">
+<ellipse cx="400" cy="150" rx="15" ry="8" fill="#7cb342" opacity="0.3" transform="rotate(30,400,150)"/>
+</g>
+<g class="float-ingredient float-ingredient-3">
+<circle cx="420" cy="250" r="10" fill="#ffc107" opacity="0.25"/>
+<circle cx="420" cy="250" r="6" fill="#ffd54f" opacity="0.35"/>
+</g>
+<g class="float-ingredient float-ingredient-4">
+<path d="M80,280 Q90,265 100,275 Q95,270 80,280Z" fill="#e53935" opacity="0.3"/>
+</g>
+<g class="float-ingredient" style="animation-delay:1.5s">
+<circle cx="380" cy="100" r="8" fill="#ff6b35" opacity="0.2"/>
+</g>
+<g class="float-ingredient float-ingredient-2" style="animation-delay:0.8s">
+<ellipse cx="130" cy="120" rx="12" ry="6" fill="#7cb342" opacity="0.2" transform="rotate(-20,130,120)"/>
+</g>
+
+<!-- Fork & Knife -->
+<g opacity="0.4">
+<rect x="400" y="200" width="3" height="80" rx="1.5" fill="#c0a080" transform="rotate(15,400,200)"/>
+<rect x="395" y="195" width="2" height="25" rx="1" fill="#c0a080" transform="rotate(15,395,195)"/>
+<rect x="400" y="195" width="2" height="25" rx="1" fill="#c0a080" transform="rotate(15,400,195)"/>
+<rect x="405" y="195" width="2" height="25" rx="1" fill="#c0a080" transform="rotate(15,405,195)"/>
+</g>
+<g opacity="0.4">
+<rect x="90" y="210" width="3" height="75" rx="1.5" fill="#c0a080" transform="rotate(-10,90,210)"/>
+<ellipse cx="91" cy="205" rx="6" ry="10" fill="#c0a080" transform="rotate(-10,91,205)"/>
+</g>
+</svg>
+</div>
+</div>
+</section>
+
+<!-- How It Works -->
+<section id="how-it-works">
+<div class="section-header reveal">
+<span class="section-tag">Simple Process</span>
+<h2 class="section-title">How FoodieBox Works</h2>
+<p class="section-subtitle">From our kitchen to your table in three deliciously simple steps</p>
+</div>
+<div class="steps-grid">
+<div class="step-card reveal">
+<div class="step-num">01</div>
+<div class="step-icon">
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+<rect x="5" y="8" width="30" height="24" rx="4" stroke="#ff6b35" stroke-width="2"/>
+<path d="M5 16H35" stroke="#ff6b35" stroke-width="2"/>
+<circle cx="20" cy="24" r="4" stroke="#7cb342" stroke-width="1.5"/>
+</svg>
+</div>
+<h3>Choose Your Plan</h3>
+<p>Select from our curated weekly menus. Pick meals that match your taste, dietary needs, and nutritional goals.</p>
+</div>
+<div class="step-card reveal">
+<div class="step-num">02</div>
+<div class="step-icon">
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+<rect x="4" y="12" width="20" height="20" rx="3" stroke="#ff6b35" stroke-width="2"/>
+<path d="M24 18L36 12V32L24 26V18Z" stroke="#7cb342" stroke-width="2"/>
+<circle cx="14" cy="22" r="3" fill="#ff6b35" opacity="0.3"/>
+</svg>
+</div>
+<h3>We Prep & Deliver</h3>
+<p>Our chefs and farmers prepare your organic ingredients with care. Free insulated delivery to your doorstep.</p>
+</div>
+<div class="step-card reveal">
+<div class="step-num">03</div>
+<div class="step-icon">
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+<path d="M8 32L20 8L32 32H8Z" stroke="#ff6b35" stroke-width="2" fill="none"/>
+<circle cx="20" cy="24" r="6" stroke="#7cb342" stroke-width="1.5"/>
+<path d="M17 24L19 26L23 22" stroke="#7cb342" stroke-width="1.5" fill="none"/>
+</svg>
+</div>
+<h3>Cook & Savor</h3>
+<p>Follow our step-by-step chef guides. Create restaurant-quality meals in 30 minutes or less. Bon appétit!</p>
+</div>
+</div>
+</section>
+
+<!-- Menu Preview -->
+<section id="menu">
+<div class="section-header reveal">
+<span class="section-tag">This Week's Menu</span>
+<h2 class="section-title">Chef-Crafted Recipes</h2>
+<p class="section-subtitle">Discover our rotating selection of gourmet dishes from world-renowned chefs</p>
+</div>
+<div class="recipes-grid">
+<div class="recipe-card reveal">
+<div class="recipe-card-inner">
+<div class="recipe-front">
+<div class="recipe-img" style="background:linear-gradient(135deg,#2a1a0a,#1a0f0a)">🍝</div>
+<div class="recipe-info">
+<span class="recipe-tag tag-italian">Italian</span>
+<h3>Truffle Risotto</h3>
+<p>Creamy arborio rice with black truffle shavings, aged parmesan, and fresh herbs.</p>
+<div class="recipe-meta">
+<span>⏱ 30 min</span>
+<span>🔥 520 cal</span>
+<span>⭐ 4.9</span>
+</div>
+</div>
+</div>
+<div class="recipe-back">
+<h3>Truffle Risotto</h3>
+<p>Indulge in this Italian classic featuring premium arborio rice, hand-grated Parmigiano-Reggiano, and shaved black truffle. Serves 2.</p>
+<a href="#pricing" class="btn btn-primary">Order Now</a>
+</div>
+</div>
+</div>
+<div class="recipe-card reveal">
+<div class="recipe-card-inner">
+<div class="recipe-front">
+<div class="recipe-img" style="background:linear-gradient(135deg,#1a2a0a,#0f1a0a)">🥘</div>
+<div class="recipe-info">
+<span class="recipe-tag tag-french">French</span>
+<h3>Bouillabaisse</h3>
+<p>Provençal seafood stew with saffron, fresh herbs, and crusty artisan bread.</p>
+<div class="recipe-meta">
+<span>⏱ 40 min</span>
+<span>🔥 480 cal</span>
+<span>⭐ 4.8</span>
+</div>
+</div>
+</div>
+<div class="recipe-back">
+<h3>Bouillabaisse</h3>
+<p>A taste of the Mediterranean with fresh catch of the day, fennel, saffron broth, and rouille sauce. Serves 2.</p>
+<a href="#pricing" class="btn btn-primary">Order Now</a>
+</div>
+</div>
+</div>
+<div class="recipe-card reveal">
+<div class="recipe-card-inner">
+<div class="recipe-front">
+<div class="recipe-img" style="background:linear-gradient(135deg,#2a1a1a,#0f0a0a)">🍜</div>
+<div class="recipe-info">
+<span class="recipe-tag tag-asian">Asian</span>
+<h3>Miso Ramen</h3>
+<p>Rich tonkotsu broth, handmade noodles, chashu pork, and a perfectly soft egg.</p>
+<div class="recipe-meta">
+<span>⏱ 25 min</span>
+<span>🔥 580 cal</span>
+<span>⭐ 4.9</span>
+</div>
+</div>
+</div>
+<div class="recipe-back">
+<h3>Miso Ramen</h3>
+<p>Authentic Japanese comfort in a bowl. Slow-cooked broth, premium noodles, and all the traditional toppings. Serves 2.</p>
+<a href="#pricing" class="btn btn-primary">Order Now</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Nutrition -->
+<section id="nutrition" class="nutrition-section">
+<div class="section-header reveal">
+<span class="section-tag">Personalized Nutrition</span>
+<h2 class="section-title">Nutrition You Can Trust</h2>
+<p class="section-subtitle">Every meal is crafted with balanced macros tailored to your wellness goals</p>
+</div>
+<div class="nutrition-grid">
+<div class="macro-card reveal">
+<div class="macro-ring">
+<svg width="100" height="100" viewBox="0 0 100 100">
+<circle class="macro-bg" cx="50" cy="50" r="42"/>
+<circle class="macro-progress" cx="50" cy="50" r="42" stroke="#ff6b35" stroke-dasharray="264" stroke-dashoffset="66"/>
+</svg>
+<div class="macro-value" style="color:#ff6b35">75g</div>
+</div>
+<h4>Protein</h4>
+<p>Premium sources in every meal</p>
+</div>
+<div class="macro-card reveal">
+<div class="macro-ring">
+<svg width="100" height="100" viewBox="0 0 100 100">
+<circle class="macro-bg" cx="50" cy="50" r="42"/>
+<circle class="macro-progress" cx="50" cy="50" r="42" stroke="#7cb342" stroke-dasharray="264" stroke-dashoffset="106"/>
+</svg>
+<div class="macro-value" style="color:#7cb342">60g</div>
+</div>
+<h4>Carbs</h4>
+<p>Complex & wholesome energy</p>
+</div>
+<div class="macro-card reveal">
+<div class="macro-ring">
+<svg width="100" height="100" viewBox="0 0 100 100">
+<circle class="macro-bg" cx="50" cy="50" r="42"/>
+<circle class="macro-progress" cx="50" cy="50" r="42" stroke="#ffc107" stroke-dasharray="264" stroke-dashoffset="92"/>
+</svg>
+<div class="macro-value" style="color:#ffc107">45g</div>
+</div>
+<h4>Healthy Fats</h4>
+<p>Omega-rich & heart-healthy</p>
+</div>
+<div class="macro-card reveal">
+<div class="macro-ring">
+<svg width="100" height="100" viewBox="0 0 100 100">
+<circle class="macro-bg" cx="50" cy="50" r="42"/>
+<circle class="macro-progress" cx="50" cy="50" r="42" stroke="#e53935" stroke-dasharray="264" stroke-dashoffset="53"/>
+</svg>
+<div class="macro-value" style="color:#e53935">35g</div>
+</div>
+<h4>Fiber</h4>
+<p>Digestive wellness focus</p>
+</div>
+</div>
+</section>
+
+<!-- Testimonials -->
+<section id="testimonials">
+<div class="section-header reveal">
+<span class="section-tag">Testimonials</span>
+<h2 class="section-title">Loved by Foodies</h2>
+<p class="section-subtitle">Join thousands of home cooks who've transformed their kitchen experience</p>
+</div>
+<div class="testimonials-grid">
+<div class="testimonial-card reveal">
+<div class="stars">★★★★★</div>
+<p class="testimonial-text">"FoodieBox has completely changed how I think about weeknight dinners. The ingredients are incredibly fresh and the recipes are foolproof."</p>
+<div class="testimonial-author">
+<div class="author-avatar" style="background:linear-gradient(135deg,#ff6b35,#ff8c5a);color:#fff">S</div>
+<div><div class="author-name">Sarah M.</div><div class="author-role">Home Cook, NYC</div></div>
+</div>
+</div>
+<div class="testimonial-card reveal">
+<div class="stars">★★★★★</div>
+<p class="testimonial-text">"As a nutritionist, I'm impressed by the macro balance and ingredient quality. Finally, meal kits that align with my professional standards."</p>
+<div class="testimonial-author">
+<div class="author-avatar" style="background:linear-gradient(135deg,#7cb342,#8bc34a);color:#fff">D</div>
+<div><div class="author-name">Dr. James K.</div><div class="author-role">Nutritionist, LA</div></div>
+</div>
+</div>
+<div class="testimonial-card reveal">
+<div class="stars">★★★★★</div>
+<p class="testimonial-text">"The truffle risotto alone is worth the subscription. My partner and I look forward to our FoodieBox every single week."</p>
+<div class="testimonial-author">
+<div class="author-avatar" style="background:linear-gradient(135deg,#ffc107,#ffd54f);color:#1a0f0a">M</div>
+<div><div class="author-name">Maria L.</div><div class="author-role">Food Blogger, Chicago</div></div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Pricing -->
+<section id="pricing">
+<div class="section-header reveal">
+<span class="section-tag">Pricing</span>
+<h2 class="section-title">Choose Your Plan</h2>
+<p class="section-subtitle">Flexible plans for every household. Cancel or pause anytime.</p>
+</div>
+<div class="pricing-grid">
+<div class="pricing-card reveal">
+<h3>Starter</h3>
+<div class="pricing-amount">$59<span>/week</span></div>
+<p class="pricing-desc">Perfect for couples exploring new flavors</p>
+<ul class="pricing-features">
+<li>2 recipes per week</li>
+<li>2 servings each</li>
+<li>Free shipping</li>
+<li>Basic nutrition info</li>
+</ul>
+<a href="#cta" class="btn btn-outline">Get Started</a>
+</div>
+<div class="pricing-card featured reveal">
+<div class="popular-badge">Most Popular</div>
+<h3>Gourmet</h3>
+<div class="pricing-amount">$99<span>/week</span></div>
+<p class="pricing-desc">Our most loved plan for food enthusiasts</p>
+<ul class="pricing-features">
+<li>4 recipes per week</li>
+<li>4 servings each</li>
+<li>Free express shipping</li>
+<li>Personalized nutrition</li>
+<li>Exclusive chef recipes</li>
+</ul>
+<a href="#cta" class="btn btn-primary">Get Started</a>
+</div>
+<div class="pricing-card reveal">
+<h3>Family</h3>
+<div class="pricing-amount">$149<span>/week</span></div>
+<p class="pricing-desc">Feed the whole family with gourmet meals</p>
+<ul class="pricing-features">
+<li>5 recipes per week</li>
+<li>6 servings each</li>
+<li>Free priority shipping</li>
+<li>Family nutrition profiles</li>
+<li>Kid-friendly options</li>
+</ul>
+<a href="#cta" class="btn btn-outline">Get Started</a>
+</div>
+</div>
+</section>
+
+<!-- CTA -->
+<section id="cta" class="cta-section">
+<div class="orb orb-1" style="top:50%;left:50%;transform:translate(-50%,-50%);width:800px;height:800px;opacity:0.5"></div>
+<div class="cta-content reveal">
+<h2>Ready to Transform<br>Your Kitchen?</h2>
+<p>Join 50,000+ food lovers enjoying gourmet meals at home. First box ships free. No commitment, cancel anytime.</p>
+<div class="cta-btns">
+<a href="#pricing" class="btn btn-primary" style="padding:1rem 2.5rem;font-size:1.05rem">Start Cooking Today</a>
+<a href="#menu" class="btn btn-outline" style="padding:1rem 2.5rem;font-size:1.05rem">View This Week's Menu</a>
+</div>
+</div>
+</section>
+
+<!-- Footer -->
+<footer>
+<div class="footer-grid">
+<div class="footer-brand">
+<div class="logo">Foodie<span>Box</span></div>
+<p>Bringing gourmet dining to your home with chef-crafted recipes and the finest organic ingredients since 2020.</p>
+</div>
+<div class="footer-col">
+<h4>Company</h4>
+<ul>
+<li><a href="#">About Us</a></li>
+<li><a href="#">Our Chefs</a></li>
+<li><a href="#">Sustainability</a></li>
+<li><a href="#">Careers</a></li>
+</ul>
+</div>
+<div class="footer-col">
+<h4>Support</h4>
+<ul>
+<li><a href="#">Help Center</a></li>
+<li><a href="#">Delivery Info</a></li>
+<li><a href="#">FAQs</a></li>
+<li><a href="#">Contact Us</a></li>
+</ul>
+</div>
+<div class="footer-col">
+<h4>Legal</h4>
+<ul>
+<li><a href="#">Privacy Policy</a></li>
+<li><a href="#">Terms of Service</a></li>
+<li><a href="#">Cookie Policy</a></li>
+</ul>
+</div>
+</div>
+<div class="footer-bottom">
+<p>© 2026 FoodieBox. All rights reserved. Made with 🧡 for food lovers everywhere.</p>
+</div>
+</footer>
+
+<script>
+// Cursor Glow
+const glow=document.getElementById('cursorGlow');
+const dot=document.getElementById('cursorDot');
+let mx=0,my=0,cx=0,cy=0;
+document.addEventListener('mousemove',e=>{
+mx=e.clientX;my=e.clientY;
+dot.style.left=mx+'px';dot.style.top=my+'px';
+});
+function animateCursor(){
+cx+=(mx-cx)*0.15;cy+=(my-cy)*0.15;
+glow.style.left=cx+'px';glow.style.top=cy+'px';
+requestAnimationFrame(animateCursor);
+}
+animateCursor();
+
+// Floating Particles
+const particlesEl=document.getElementById('particles');
+const emojis=['🌿','🍃','🌶️','🧄','🫒','🌽','🍋','🫑','🥬','🧅','🍅','🌿'];
+for(let i=0;i<18;i++){
+const p=document.createElement('div');
+p.className='particle';
+p.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+p.style.left=Math.random()*100+'%';
+p.style.animationDuration=(15+Math.random()*20)+'s';
+p.style.animationDelay=Math.random()*15+'s';
+p.style.fontSize=(0.8+Math.random()*1.2)+'rem';
+particlesEl.appendChild(p);
+}
+
+// Navbar scroll
+const navbar=document.getElementById('navbar');
+window.addEventListener('scroll',()=>{
+navbar.classList.toggle('scrolled',window.scrollY>50);
+});
+
+// Scroll Reveal
+const reveals=document.querySelectorAll('.reveal');
+const observer=new IntersectionObserver((entries)=>{
+entries.forEach(entry=>{
+if(entry.isIntersecting){
+entry.target.classList.add('visible');
+}
+});
+},{threshold:0.1,rootMargin:'0px 0px -50px 0px'});
+reveals.forEach(el=>observer.observe(el));
+
+// Macro ring animation
+const macroObserver=new IntersectionObserver((entries)=>{
+entries.forEach(entry=>{
+if(entry.target.classList.contains('macro-card')){
+const circles=entry.target.querySelectorAll('.macro-progress');
+circles.forEach(c=>{
+c.style.transition='stroke-dashoffset 1.5s ease';
+});
+}
+});
+},{threshold:0.3});
+document.querySelectorAll('.macro-card').forEach(el=>macroObserver.observe(el));
+</script>
+</body>
+</html>
